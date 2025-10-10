@@ -4111,20 +4111,61 @@ pub enum perf_event_type {
     PERF_RECORD_AUX_OUTPUT_HW_ID = 21,
     PERF_RECORD_MAX = 22,
 }
-pub const TCA_BPF_UNSPEC: _bindgen_ty_154 = 0;
-pub const TCA_BPF_ACT: _bindgen_ty_154 = 1;
-pub const TCA_BPF_POLICE: _bindgen_ty_154 = 2;
-pub const TCA_BPF_CLASSID: _bindgen_ty_154 = 3;
-pub const TCA_BPF_OPS_LEN: _bindgen_ty_154 = 4;
-pub const TCA_BPF_OPS: _bindgen_ty_154 = 5;
-pub const TCA_BPF_FD: _bindgen_ty_154 = 6;
-pub const TCA_BPF_NAME: _bindgen_ty_154 = 7;
-pub const TCA_BPF_FLAGS: _bindgen_ty_154 = 8;
-pub const TCA_BPF_FLAGS_GEN: _bindgen_ty_154 = 9;
-pub const TCA_BPF_TAG: _bindgen_ty_154 = 10;
-pub const TCA_BPF_ID: _bindgen_ty_154 = 11;
-pub const __TCA_BPF_MAX: _bindgen_ty_154 = 12;
-pub type _bindgen_ty_154 = ::core::ffi::c_uint;
+pub const HW_BREAKPOINT_LEN_1: _bindgen_ty_106 = 1;
+pub const HW_BREAKPOINT_LEN_2: _bindgen_ty_106 = 2;
+pub const HW_BREAKPOINT_LEN_3: _bindgen_ty_106 = 3;
+pub const HW_BREAKPOINT_LEN_4: _bindgen_ty_106 = 4;
+pub const HW_BREAKPOINT_LEN_5: _bindgen_ty_106 = 5;
+pub const HW_BREAKPOINT_LEN_6: _bindgen_ty_106 = 6;
+pub const HW_BREAKPOINT_LEN_7: _bindgen_ty_106 = 7;
+pub const HW_BREAKPOINT_LEN_8: _bindgen_ty_106 = 8;
+pub type _bindgen_ty_106 = ::core::ffi::c_uint;
+pub const HW_BREAKPOINT_EMPTY: _bindgen_ty_107 = 0;
+pub const HW_BREAKPOINT_R: _bindgen_ty_107 = 1;
+pub const HW_BREAKPOINT_W: _bindgen_ty_107 = 2;
+pub const HW_BREAKPOINT_RW: _bindgen_ty_107 = 3;
+pub const HW_BREAKPOINT_X: _bindgen_ty_107 = 4;
+pub const HW_BREAKPOINT_INVALID: _bindgen_ty_107 = 7;
+pub type _bindgen_ty_107 = ::core::ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct pt_regs {
+    pub gpr: [::core::ffi::c_ulong; 32usize],
+    pub nip: ::core::ffi::c_ulong,
+    pub msr: ::core::ffi::c_ulong,
+    pub orig_gpr3: ::core::ffi::c_ulong,
+    pub ctr: ::core::ffi::c_ulong,
+    pub link: ::core::ffi::c_ulong,
+    pub xer: ::core::ffi::c_ulong,
+    pub ccr: ::core::ffi::c_ulong,
+    pub softe: ::core::ffi::c_ulong,
+    pub trap: ::core::ffi::c_ulong,
+    pub dar: ::core::ffi::c_ulong,
+    pub dsisr: ::core::ffi::c_ulong,
+    pub result: ::core::ffi::c_ulong,
+}
+pub type bpf_user_pt_regs_t = pt_regs;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct bpf_perf_event_data {
+    pub regs: bpf_user_pt_regs_t,
+    pub sample_period: __u64,
+    pub addr: __u64,
+}
+pub const TCA_BPF_UNSPEC: _bindgen_ty_156 = 0;
+pub const TCA_BPF_ACT: _bindgen_ty_156 = 1;
+pub const TCA_BPF_POLICE: _bindgen_ty_156 = 2;
+pub const TCA_BPF_CLASSID: _bindgen_ty_156 = 3;
+pub const TCA_BPF_OPS_LEN: _bindgen_ty_156 = 4;
+pub const TCA_BPF_OPS: _bindgen_ty_156 = 5;
+pub const TCA_BPF_FD: _bindgen_ty_156 = 6;
+pub const TCA_BPF_NAME: _bindgen_ty_156 = 7;
+pub const TCA_BPF_FLAGS: _bindgen_ty_156 = 8;
+pub const TCA_BPF_FLAGS_GEN: _bindgen_ty_156 = 9;
+pub const TCA_BPF_TAG: _bindgen_ty_156 = 10;
+pub const TCA_BPF_ID: _bindgen_ty_156 = 11;
+pub const __TCA_BPF_MAX: _bindgen_ty_156 = 12;
+pub type _bindgen_ty_156 = ::core::ffi::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct ifinfomsg {
@@ -4146,22 +4187,22 @@ pub struct tcmsg {
     pub tcm_parent: __u32,
     pub tcm_info: __u32,
 }
-pub const TCA_UNSPEC: _bindgen_ty_174 = 0;
-pub const TCA_KIND: _bindgen_ty_174 = 1;
-pub const TCA_OPTIONS: _bindgen_ty_174 = 2;
-pub const TCA_STATS: _bindgen_ty_174 = 3;
-pub const TCA_XSTATS: _bindgen_ty_174 = 4;
-pub const TCA_RATE: _bindgen_ty_174 = 5;
-pub const TCA_FCNT: _bindgen_ty_174 = 6;
-pub const TCA_STATS2: _bindgen_ty_174 = 7;
-pub const TCA_STAB: _bindgen_ty_174 = 8;
-pub const TCA_PAD: _bindgen_ty_174 = 9;
-pub const TCA_DUMP_INVISIBLE: _bindgen_ty_174 = 10;
-pub const TCA_CHAIN: _bindgen_ty_174 = 11;
-pub const TCA_HW_OFFLOAD: _bindgen_ty_174 = 12;
-pub const TCA_INGRESS_BLOCK: _bindgen_ty_174 = 13;
-pub const TCA_EGRESS_BLOCK: _bindgen_ty_174 = 14;
-pub const TCA_DUMP_FLAGS: _bindgen_ty_174 = 15;
-pub const TCA_EXT_WARN_MSG: _bindgen_ty_174 = 16;
-pub const __TCA_MAX: _bindgen_ty_174 = 17;
-pub type _bindgen_ty_174 = ::core::ffi::c_uint;
+pub const TCA_UNSPEC: _bindgen_ty_176 = 0;
+pub const TCA_KIND: _bindgen_ty_176 = 1;
+pub const TCA_OPTIONS: _bindgen_ty_176 = 2;
+pub const TCA_STATS: _bindgen_ty_176 = 3;
+pub const TCA_XSTATS: _bindgen_ty_176 = 4;
+pub const TCA_RATE: _bindgen_ty_176 = 5;
+pub const TCA_FCNT: _bindgen_ty_176 = 6;
+pub const TCA_STATS2: _bindgen_ty_176 = 7;
+pub const TCA_STAB: _bindgen_ty_176 = 8;
+pub const TCA_PAD: _bindgen_ty_176 = 9;
+pub const TCA_DUMP_INVISIBLE: _bindgen_ty_176 = 10;
+pub const TCA_CHAIN: _bindgen_ty_176 = 11;
+pub const TCA_HW_OFFLOAD: _bindgen_ty_176 = 12;
+pub const TCA_INGRESS_BLOCK: _bindgen_ty_176 = 13;
+pub const TCA_EGRESS_BLOCK: _bindgen_ty_176 = 14;
+pub const TCA_DUMP_FLAGS: _bindgen_ty_176 = 15;
+pub const TCA_EXT_WARN_MSG: _bindgen_ty_176 = 16;
+pub const __TCA_MAX: _bindgen_ty_176 = 17;
+pub type _bindgen_ty_176 = ::core::ffi::c_uint;
