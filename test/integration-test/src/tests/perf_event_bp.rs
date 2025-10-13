@@ -14,15 +14,16 @@ use aya::{
     },
     util::online_cpus,
 };
-use log::info;
+use log::{debug, error, info};
 
 // Parse /proc/kallsyms and return the address for the given symbol name, if
 // found.
 fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
-    let file = File::open("/proc/kallsyms").ok()?;
+    let file = File::open("/proc/kallsyms").expect("failed to open /proc/kallsyms");
     let reader = BufReader::new(file);
 
     for line in reader.lines().map_while(Result::ok) {
+        debug!("kallsyms line: {line}");
         // Format: "<addr> <type> <symbol> [<module>]"
         let mut parts = line.split_whitespace();
         let addr_str = parts.next()?;
@@ -31,10 +32,12 @@ fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
         if name == sym
             && let Ok(addr) = u64::from_str_radix(addr_str, 16)
         {
+            debug!("found symbol {sym} at address {addr:#x}");
             return Some(addr);
         }
     }
 
+    error!("failed to find symbol {sym} in /proc/kallsyms");
     None
 }
 
