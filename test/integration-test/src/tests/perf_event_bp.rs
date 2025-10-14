@@ -15,18 +15,18 @@ use aya::{
     },
     util::online_cpus,
 };
+use glob::glob;
 use log::{debug, error, info};
 
 fn dump_config() {
-    let release =
-        String::from_utf8_lossy(&Command::new("uname").arg("-r").output().unwrap().stdout)
-            .trim()
-            .to_string();
-    let mut file =
-        File::open(format!("/boot/config-{release}")).expect("failed to open kernel config");
-    let mut config = String::new();
-    file.read_to_string(&mut config).unwrap();
-    debug!("kernel config:\n{config}");
+    for f in glob("/boot/config-*").unwrap() {
+        let f = f.unwrap();
+        debug!("found kernel config: {:}", f.to_str().unwrap());
+        let mut file = File::open(f).expect("failed to open kernel config");
+        let mut config = String::new();
+        file.read_to_string(&mut config).unwrap();
+        debug!("kernel config contents:\n{config}");
+    }
 }
 
 // Parse /proc/kallsyms and return the address for the given symbol name, if
