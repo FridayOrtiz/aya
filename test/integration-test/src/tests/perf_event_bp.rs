@@ -30,7 +30,7 @@ fn dump_config() {
 }
 
 fn find_system_map_symbol(sym: &str) -> Option<u64> {
-    let map = glob("/boot/System.map-*").unwrap().last().unwrap().unwrap();
+    let map = glob("/boot/System.map-*").unwrap().next().unwrap().unwrap();
     let file = File::open(&map).expect("failed to open System.map");
     let reader = BufReader::new(file);
 
