@@ -30,6 +30,10 @@ fn dump_config() {
 }
 
 fn find_system_map_symbol(sym: &str) -> Option<u64> {
+    for e in fs::read_dir("/boot").unwrap() {
+        let e = e.unwrap();
+        debug!("found /boot/{:}", e.path().to_str().unwrap());
+    }
     let map = glob("/boot/System.map*")
         .expect("failed to read /boot/System.map*")
         .next()
