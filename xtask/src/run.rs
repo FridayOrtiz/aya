@@ -319,6 +319,7 @@ pub(crate) fn run(opts: Options) -> Result<()> {
 
                 let mut kernel_images = Vec::new();
                 let mut configs = Vec::new();
+                let mut system_maps = Vec::new();
                 for entry in WalkDir::new(&archive_dir) {
                     let entry = entry.with_context(|| {
                         format!("failed to read entry in {}", archive_dir.display())
@@ -350,6 +351,23 @@ pub(crate) fn run(opts: Options) -> Result<()> {
                             [b'c', b'o', b'n', b'f', b'i', b'g', b'-', ..] => {
                                 configs.push(path);
                             }
+                            // "System.map-"
+                            [
+                                b'S',
+                                b'y',
+                                b's',
+                                b't',
+                                b'e',
+                                b'm',
+                                b'.',
+                                b'm',
+                                b'a',
+                                b'p',
+                                b'-',
+                                ..,
+                            ] => {
+                                system_maps.push(path);
+                            }
                             _ => {}
                         }
                     }
@@ -366,6 +384,15 @@ pub(crate) fn run(opts: Options) -> Result<()> {
                 let config = match configs.as_slice() {
                     [config] => config,
                     configs => bail!("multiple configs in {}: {:?}", archive.display(), configs),
+                };
+
+                let system_map = match system_maps.as_slice() {
+                    [system_map] => system_map,
+                    system_maps => bail!(
+                        "multiple System.map files in {}: {:?}",
+                        archive.display(),
+                        system_maps
+                    ),
                 };
 
                 let mut modules_dirs = Vec::new();
@@ -503,6 +530,11 @@ pub(crate) fn run(opts: Options) -> Result<()> {
                 write_file(Path::new("/boot/config"), config, "644 0 0");
                 if let Some(name) = config.file_name() {
                     write_file(&Path::new("/boot").join(name), config, "644 0 0");
+                }
+
+                write_file(Path::new("/boot/System.map"), system_map, "644 0 0");
+                if let Some(name) = system_map.file_name() {
+                    write_file(&Path::new("/boot").join(name), system_map, "644 0 0");
                 }
 
                 test_distro.iter().for_each(|(name, path)| {
