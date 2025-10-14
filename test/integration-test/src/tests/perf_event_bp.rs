@@ -1,6 +1,7 @@
 use std::{
     fs::{self, File},
-    io::{BufRead as _, BufReader},
+    io::{BufRead as _, BufReader, Read},
+    process::Command,
 };
 
 use aya::{
@@ -15,6 +16,18 @@ use aya::{
     util::online_cpus,
 };
 use log::{debug, error, info};
+
+fn dump_config() {
+    let release =
+        String::from_utf8_lossy(&Command::new("uname").arg("-r").output().unwrap().stdout)
+            .trim()
+            .to_string();
+    let mut file =
+        File::open(format!("/boot/config-{release}")).expect("failed to open kernel config");
+    let mut config = String::new();
+    file.read_to_string(&mut config).unwrap();
+    debug!("kernel config:\n{config}");
+}
 
 // Parse /proc/kallsyms and return the address for the given symbol name, if
 // found.
@@ -45,6 +58,7 @@ fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
 fn perf_event_bp() {
     let mut bpf = Ebpf::load(crate::PERF_EVENT_BP).unwrap();
 
+    dump_config();
     let attach_addr = find_kallsyms_symbol("modprobe_path").unwrap();
 
     let prog: &mut aya::programs::PerfEvent = bpf
