@@ -29,14 +29,13 @@ fn dump_config() {
     }
 }
 
-// Parse /proc/kallsyms and return the address for the given symbol name, if
-// found.
-fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
-    let file = File::open("/proc/kallsyms").expect("failed to open /proc/kallsyms");
+fn find_system_map_symbol(sym: &str) -> Option<u64> {
+    let map = glob("/boot/System.map-*").unwrap().next().unwrap().unwrap();
+    let file = File::open(&map).expect("failed to open System.map");
     let reader = BufReader::new(file);
 
     for line in reader.lines().map_while(Result::ok) {
-        debug!("kallsyms line: {line}");
+        debug!("System.map line: {line}");
         // Format: "<addr> <type> <symbol> [<module>]"
         let mut parts = line.split_whitespace();
         let addr_str = parts.next()?;
@@ -50,7 +49,7 @@ fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
         }
     }
 
-    error!("failed to find symbol {sym} in /proc/kallsyms");
+    error!("failed to find symbol {sym} in System.map");
     None
 }
 
@@ -59,7 +58,7 @@ fn perf_event_bp() {
     let mut bpf = Ebpf::load(crate::PERF_EVENT_BP).unwrap();
 
     dump_config();
-    let attach_addr = find_kallsyms_symbol("modprobe_path").unwrap();
+    let attach_addr = find_system_map_symbol("modprobe_path").unwrap();
 
     let prog: &mut aya::programs::PerfEvent = bpf
         .program_mut("perf_event_bp")
