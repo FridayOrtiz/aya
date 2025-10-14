@@ -1,7 +1,6 @@
 use std::{
     fs::{self, File},
     io::{BufRead as _, BufReader, Read},
-    process::Command,
 };
 
 use aya::{
@@ -16,17 +15,13 @@ use aya::{
     util::online_cpus,
 };
 use glob::glob;
-use log::{debug, error, info};
+use log::{debug, info};
 
-fn dump_config() {
-    for f in glob("/boot/config-*").unwrap() {
-        let f = f.unwrap();
-        debug!("found kernel config: {:}", f.to_str().unwrap());
-        let mut file = File::open(f).expect("failed to open kernel config");
-        let mut config = String::new();
-        file.read_to_string(&mut config).unwrap();
-        debug!("kernel config contents:\n{config}");
-    }
+fn dump(s: &str) {
+    let mut file = File::open(s).expect(&format!("failed to open {s}"));
+    let mut contents = String::new();
+    file.read_to_string(&mut contents).unwrap();
+    debug!("{s} contents:\n{contents}");
 }
 
 fn find_system_map_symbol(sym: &str) -> Option<u64> {
@@ -84,10 +79,11 @@ fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
 #[test_log::test]
 fn perf_event_bp() {
     let mut bpf = Ebpf::load(crate::PERF_EVENT_BP).unwrap();
-    //dump_config();
     let attach_addr = if let Some(addr) = find_kallsyms_symbol("modprobe_path") {
         addr
     } else {
+        dump("/proc/kallsyms");
+        dump("/boot/System.map");
         let kaslr_offset: i64 = ((find_kallsyms_symbol("gunzip").unwrap() as i128)
             - (find_system_map_symbol("gunzip").unwrap() as i128))
             .try_into()
