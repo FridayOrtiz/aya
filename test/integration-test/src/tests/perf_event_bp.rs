@@ -88,8 +88,8 @@ fn perf_event_bp() {
     let attach_addr = if let Some(addr) = find_kallsyms_symbol("modprobe_path") {
         addr
     } else {
-        let kaslr_offset: i64 = ((find_kallsyms_symbol("kernel_text_address").unwrap() as i128)
-            - (find_system_map_symbol("kernel_text_address").unwrap() as i128))
+        let kaslr_offset: i64 = ((find_kallsyms_symbol("_text").unwrap() as i128)
+            - (find_system_map_symbol("_text").unwrap() as i128))
             .try_into()
             .unwrap();
 
