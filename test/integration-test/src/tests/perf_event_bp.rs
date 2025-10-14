@@ -35,7 +35,6 @@ fn find_system_map_symbol(sym: &str) -> Option<u64> {
     let reader = BufReader::new(file);
 
     for line in reader.lines().map_while(Result::ok) {
-        //debug!("System.map line: {line}");
         // Format: "<addr> <type> <symbol> [<module>]"
         let mut parts = line.split_whitespace();
         let addr_str = parts.next()?;
@@ -49,7 +48,6 @@ fn find_system_map_symbol(sym: &str) -> Option<u64> {
         }
     }
 
-    error!("failed to find symbol {sym} in System.map");
     None
 }
 
@@ -60,7 +58,6 @@ fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
     let reader = BufReader::new(file);
 
     for line in reader.lines().map_while(Result::ok) {
-        debug!("kallsyms line: {line}");
         // Format: "<addr> <type> <symbol> [<module>]"
         let mut parts = line.split_whitespace();
         let addr_str = parts.next()?;
@@ -69,28 +66,29 @@ fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
         if name == sym
             && let Ok(addr) = u64::from_str_radix(addr_str, 16)
         {
-            debug!("found symbol {sym} at address {addr:#x}");
             return Some(addr);
         }
     }
 
-    error!("failed to find symbol {sym} in /proc/kallsyms");
     None
 }
 
 #[test_log::test]
 fn perf_event_bp() {
     let mut bpf = Ebpf::load(crate::PERF_EVENT_BP).unwrap();
-    let kaslr_offset: i64 = ((find_kallsyms_symbol("_text").unwrap() as i128)
-        - (find_system_map_symbol("_text").unwrap() as i128))
-        .try_into()
-        .unwrap();
-
     //dump_config();
-    let attach_addr = find_system_map_symbol("modprobe_path")
-        .unwrap()
-        .wrapping_add_signed(kaslr_offset);
+    let attach_addr = if let Some(addr) = find_kallsyms_symbol("modprobe_path") {
+        addr
+    } else {
+        let kaslr_offset: i64 = ((find_kallsyms_symbol("kernel_text_address").unwrap() as i128)
+            - (find_system_map_symbol("kernel_text_address").unwrap() as i128))
+            .try_into()
+            .unwrap();
 
+        find_system_map_symbol("modprobe_path")
+            .unwrap()
+            .wrapping_add_signed(kaslr_offset)
+    };
     let prog: &mut aya::programs::PerfEvent = bpf
         .program_mut("perf_event_bp")
         .unwrap()
