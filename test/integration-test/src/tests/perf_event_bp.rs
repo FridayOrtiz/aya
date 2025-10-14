@@ -35,7 +35,7 @@ fn find_system_map_symbol(sym: &str) -> Option<u64> {
     let reader = BufReader::new(file);
 
     for line in reader.lines().map_while(Result::ok) {
-        debug!("System.map line: {line}");
+        //debug!("System.map line: {line}");
         // Format: "<addr> <type> <symbol> [<module>]"
         let mut parts = line.split_whitespace();
         let addr_str = parts.next()?;
@@ -81,11 +81,15 @@ fn find_kallsyms_symbol(sym: &str) -> Option<u64> {
 #[test_log::test]
 fn perf_event_bp() {
     let mut bpf = Ebpf::load(crate::PERF_EVENT_BP).unwrap();
+    let kaslr_offset: i64 = ((find_kallsyms_symbol("_text").unwrap() as i128)
+        - (find_system_map_symbol("_text").unwrap() as i128))
+        .try_into()
+        .unwrap();
 
     //dump_config();
-    let attach_addr = find_kallsyms_symbol("modprobe_path").unwrap();
-    let map_addr = find_system_map_symbol("modprobe_path").unwrap();
-    assert_eq!(attach_addr, map_addr);
+    let attach_addr = find_system_map_symbol("modprobe_path")
+        .unwrap()
+        .wrapping_add_signed(kaslr_offset);
 
     let prog: &mut aya::programs::PerfEvent = bpf
         .program_mut("perf_event_bp")
