@@ -19,7 +19,7 @@ use xtask::{AYA_BUILD_INTEGRATION_BPF, Errors};
 
 const GEN_INIT_CPIO_PATCH: &str = include_str!("../patches/gen_init_cpio.c.macos.diff");
 
-#[derive(Default)]
+#[derive(Default, Debug)]
 struct KernelPackageGroup {
     kernel: Option<PathBuf>,
     debug: Option<PathBuf>,
@@ -336,6 +336,8 @@ pub(crate) fn run(opts: Options) -> Result<()> {
                     (base, true)
                 } else if let Some(base) = package_name.strip_suffix("-dbgsym") {
                     (base, true)
+                } else if let Some(base) = package_name.strip_suffix("-unsigned") {
+                    (base, false)
                 } else {
                     (package_name, false)
                 };
