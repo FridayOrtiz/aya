@@ -61,12 +61,17 @@ pub enum PerfEventConfig {
         event_id: u64,
     },
     /// A hardware breakpoint.
-    ///
-    /// Note: this variant is not fully implemented at the moment.
-    // TODO: Variant not fully implemented due to additional `perf_event_attr` fields like
-    //       `bp_type`, `bp_addr`, etc.
     #[doc(alias = "PERF_TYPE_BREAKPOINT")]
-    Breakpoint,
+    Breakpoint {
+        /// The address to set the breakpoint on
+        address: u64,
+        /// The breakpoint size. For HwBreakpointX this must be sizeof(long). For
+        /// all other types it should be one of HwBreakpointLen1, HwBreakpointLen2,,
+        /// HwBreakpointLen4 or HwBreakpointLen8.
+        length: PerfBreakpointSize,
+        /// The breakpoint type, one of HW_BREAKPOINT_{R,W,RW,X}
+        type_: PerfBreakpointType,
+    },
     /// The dynamic PMU (Performance Monitor Unit) event to report.
     ///
     /// Available PMU's may be found under `/sys/bus/event_source/devices`.
@@ -284,57 +289,73 @@ impl HwCacheResult {
         self as u32
     }
 }
-/// A hardware breakpoint configuration
-#[derive(Debug, Clone)]
-pub struct PerfBreakpoint {
-    /// The address to set the breakpoint on
-    pub address: u64,
-    /// The breakpoint size. For HwBreakpointX this must be sizeof(long). For
-    /// all other types it should be one of HwBreakpointLen1, HwBreakpointLen2,,
-    /// HwBreakpointLen4 or HwBreakpointLen8.
-    pub length: PerfBreakpointSize,
-    /// The breakpoint type, one of HW_BREAKPOINT_{R,W,RW,X}
-    pub type_: PerfBreakpointType,
-}
 
 /// Type of hardware breakpoint, determines if we break on read, write, or execute.
 #[repr(u32)]
 #[derive(Debug, Clone, Copy)]
 pub enum PerfBreakpointType {
     /// HW_BREAKPOINT_EMPTY
+    #[doc(alias = "HW_BREAKPOINT_EMPTY")]
     HwBreakpointEmpty = HW_BREAKPOINT_EMPTY,
     /// HW_BREAKPOINT_R
+    #[doc(alias = "HW_BREAKPOINT_R")]
     HwBreakpointR = HW_BREAKPOINT_R,
     /// HW_BREAKPOINT_W
+    #[doc(alias = "HW_BREAKPOINT_W")]
     HwBreakpointW = HW_BREAKPOINT_W,
     /// HW_BREAKPOINT_RW
+    #[doc(alias = "HW_BREAKPOINT_RW")]
     HwBreakpointRW = HW_BREAKPOINT_RW,
     /// HW_BREAKPOINT_X
+    #[doc(alias = "HW_BREAKPOINT_X")]
     HwBreakpointX = HW_BREAKPOINT_X,
     /// HW_BREAKPOINT_INVALID
+    #[doc(alias = "HW_BREAKPOINT_INVALID")]
     HwBreakpointInvalid = HW_BREAKPOINT_INVALID,
 }
 
+impl PerfBreakpointType {
+    pub(crate) const fn into_primitive(self) -> u32 {
+        const _: [(); 4] = [(); std::mem::size_of::<PerfBreakpointType>()];
+        self as u32
+    }
+}
+
 /// The size of the breakpoint being measured
-#[repr(u32)]
+#[repr(u64)]
 #[derive(Debug, Clone, Copy)]
 pub enum PerfBreakpointSize {
     /// HW_BREAKPOINT_LEN_1
-    HwBreakpointLen1 = HW_BREAKPOINT_LEN_1,
+    #[doc(alias = "HW_BREAKPOINT_LEN_1")]
+    HwBreakpointLen1 = HW_BREAKPOINT_LEN_1 as u64,
     /// HW_BREAKPOINT_LEN_2
-    HwBreakpointLen2 = HW_BREAKPOINT_LEN_2,
+    #[doc(alias = "HW_BREAKPOINT_LEN_2")]
+    HwBreakpointLen2 = HW_BREAKPOINT_LEN_2 as u64,
     /// HW_BREAKPOINT_LEN_3
-    HwBreakpointLen3 = HW_BREAKPOINT_LEN_3,
+    #[doc(alias = "HW_BREAKPOINT_LEN_3")]
+    HwBreakpointLen3 = HW_BREAKPOINT_LEN_3 as u64,
     /// HW_BREAKPOINT_LEN_4
-    HwBreakpointLen4 = HW_BREAKPOINT_LEN_4,
+    #[doc(alias = "HW_BREAKPOINT_LEN_4")]
+    HwBreakpointLen4 = HW_BREAKPOINT_LEN_4 as u64,
     /// HW_BREAKPOINT_LEN_5
-    HwBreakpointLen5 = HW_BREAKPOINT_LEN_5,
+    #[doc(alias = "HW_BREAKPOINT_LEN_5")]
+    HwBreakpointLen5 = HW_BREAKPOINT_LEN_5 as u64,
     /// HW_BREAKPOINT_LEN_6
-    HwBreakpointLen6 = HW_BREAKPOINT_LEN_6,
+    #[doc(alias = "HW_BREAKPOINT_LEN_6")]
+    HwBreakpointLen6 = HW_BREAKPOINT_LEN_6 as u64,
     /// HW_BREAKPOINT_LEN_7
-    HwBreakpointLen7 = HW_BREAKPOINT_LEN_7,
+    #[doc(alias = "HW_BREAKPOINT_LEN_7")]
+    HwBreakpointLen7 = HW_BREAKPOINT_LEN_7 as u64,
     /// HW_BREAKPOINT_LEN_8
-    HwBreakpointLen8 = HW_BREAKPOINT_LEN_8,
+    #[doc(alias = "HW_BREAKPOINT_LEN_8")]
+    HwBreakpointLen8 = HW_BREAKPOINT_LEN_8 as u64,
+}
+
+impl PerfBreakpointSize {
+    pub(crate) const fn into_primitive(self) -> u64 {
+        const _: [(); 8] = [(); std::mem::size_of::<PerfBreakpointSize>()];
+        self as u64
+    }
 }
 
 /// Sample Policy
@@ -435,11 +456,8 @@ impl PerfEvent {
 
     /// Attaches to the given perf event.
     ///
-    /// [`perf_type`](PerfEventConfig) defines the event `type` and `config` of
+    /// [`perf_config`](PerfEventConfig) defines the event `type` and `config` of
     /// interest.
-    ///
-    /// The [`bp`](PerfBreakpoint) option must be specified if `perf_type` is
-    /// `Breakpoint`.
     ///
     /// [`scope`](PerfEventScope) determines which processes are sampled. If
     /// `inherit` is `true`, any new processes spawned by those processes will
@@ -448,19 +466,15 @@ impl PerfEvent {
     /// The returned value can be used to detach, see [PerfEvent::detach].
     pub fn attach(
         &mut self,
-        perf_type: PerfEventConfig,
+        perf_config: PerfEventConfig,
         scope: PerfEventScope,
         sample_policy: SamplePolicy,
         inherit: bool,
-        bp: Option<PerfBreakpoint>,
     ) -> Result<PerfEventLinkId, ProgramError> {
-        if matches!(perf_type, PerfTypeId::Breakpoint) && bp.is_none() {
-            return Err(ProgramError::IncompleteBreakpoint);
-        }
         let prog_fd = self.fd()?;
         let prog_fd = prog_fd.as_fd();
 
-        let (perf_type, config) = match perf_type {
+        let (perf_type, config) = match perf_config {
             PerfEventConfig::Pmu { pmu_type, config } => (pmu_type, config),
             PerfEventConfig::Hardware(hw_event) => (
                 perf_type_id_to_u32(PERF_TYPE_HARDWARE),
@@ -484,7 +498,11 @@ impl PerfEvent {
                     | (u64::from(result.into_primitive()) << 16),
             ),
             PerfEventConfig::Raw { event_id } => (perf_type_id_to_u32(PERF_TYPE_RAW), event_id),
-            PerfEventConfig::Breakpoint => (perf_type_id_to_u32(PERF_TYPE_BREAKPOINT), 0),
+            PerfEventConfig::Breakpoint {
+                address: _,
+                length: _,
+                type_: _,
+            } => (perf_type_id_to_u32(PERF_TYPE_BREAKPOINT), 0),
         };
         let (sample_period, sample_frequency) = match sample_policy {
             SamplePolicy::Period(period) => (period, None),
@@ -504,10 +522,11 @@ impl PerfEvent {
             cpu,
             sample_period,
             sample_frequency,
-            matches!(perf_type, PerfTypeId::Breakpoint),
+            // wakeup=true for breakpoints, false for all other types
+            perf_type == perf_type_id_to_u32(PERF_TYPE_BREAKPOINT),
             inherit,
             0,
-            bp,
+            Some(perf_config),
         )
         .map_err(|io_error| SyscallError {
             call: "perf_event_open",
