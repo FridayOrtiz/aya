@@ -434,7 +434,6 @@ pub enum PerfEventScope {
 ///         PerfEventScope::AllProcessesOneCpu { cpu },
 ///         SamplePolicy::Period(1000000),
 ///         true,
-///         None
 ///     )?;
 /// }
 /// # Ok::<(), Error>(())
