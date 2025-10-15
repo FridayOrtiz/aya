@@ -1,6 +1,6 @@
 use std::{
     fs::{self, File},
-    io::{BufRead as _, BufReader, Read},
+    io::{BufRead as _, BufReader},
 };
 
 use aya::{
@@ -16,13 +16,6 @@ use aya::{
 };
 use glob::glob;
 use log::{debug, info};
-
-fn dump(s: &str) {
-    let mut file = File::open(s).expect(&format!("failed to open {s}"));
-    let mut contents = String::new();
-    file.read_to_string(&mut contents).unwrap();
-    debug!("{s} contents:\n{contents}");
-}
 
 fn find_system_map_symbol(sym: &str) -> Option<u64> {
     for e in fs::read_dir("/boot").unwrap() {
@@ -82,12 +75,10 @@ fn perf_event_bp() {
     let attach_addr = if let Some(addr) = find_kallsyms_symbol("modprobe_path") {
         addr
     } else {
-        dump("/proc/kallsyms");
-        dump("/boot/System.map");
-        let kaslr_offset: i64 = ((find_kallsyms_symbol("gunzip").unwrap() as i128)
-            - (find_system_map_symbol("gunzip").unwrap() as i128))
-            .try_into()
-            .unwrap();
+        let kaslr_offset: i64 = (i128::from(find_kallsyms_symbol("_text").unwrap())
+            - (i128::from(find_system_map_symbol("_text").unwrap())))
+        .try_into()
+        .unwrap();
 
         find_system_map_symbol("modprobe_path")
             .unwrap()

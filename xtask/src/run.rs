@@ -19,7 +19,7 @@ use xtask::{AYA_BUILD_INTEGRATION_BPF, Errors};
 
 const GEN_INIT_CPIO_PATCH: &str = include_str!("../patches/gen_init_cpio.c.macos.diff");
 
-#[derive(Default, Debug)]
+#[derive(Default)]
 struct KernelPackageGroup {
     kernel: Option<PathBuf>,
     debug: Option<PathBuf>,
