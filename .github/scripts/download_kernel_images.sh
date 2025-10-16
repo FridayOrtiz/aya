@@ -34,7 +34,10 @@ for VERSION in "${VERSIONS[@]}"; do
   kernel_suffix=${kernel_basename#${kernel_prefix}_}
   base_prefix=${kernel_prefix%-unsigned}
 
-  DEBUG_REGEX="${base_prefix}-dbg(sym)?_${kernel_suffix}"
+  base_prefix_regex=$(printf '%s\n' "$base_prefix" | sed 's/[.+]/\\&/g')
+  kernel_suffix_regex=$(printf '%s\n' "$kernel_suffix" | sed 's/[.+]/\\&/g')
+
+  DEBUG_REGEX="${base_prefix_regex}-dbg(sym)?_${kernel_suffix_regex}"
   debug_match=$(printf '%s\n' "$URLS" | grep -E "$DEBUG_REGEX" | sort -V | tail -n1) || {
     printf 'Failed to locate debug package matching %s\n%s\nVERSION=%s\nREGEX=%s\n' \
       "$kernel_basename" "$URLS" "$VERSION" "$DEBUG_REGEX" >&2
