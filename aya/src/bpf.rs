@@ -494,6 +494,10 @@ impl<'a> EbpfLoader<'a> {
 
         if let Some(btf) = &btf {
             obj.relocate_btf(btf)?;
+            // Resolve `extern "C"` calls that hit kernel kfuncs. Has to run
+            // before `relocate_calls` so the latter doesn't trip over the
+            // unresolved-symbol relocations we patch here.
+            obj.relocate_kfuncs(btf)?;
         }
 
         const fn is_map_of_maps(map_type: bpf_map_type) -> bool {

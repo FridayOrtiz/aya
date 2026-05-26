@@ -7,9 +7,10 @@ use object::{SectionIndex, SymbolKind};
 
 use crate::{
     EbpfSectionKind,
+    btf::{Btf, BtfError, BtfKind},
     generated::{
-        BPF_CALL, BPF_JMP, BPF_K, BPF_PSEUDO_CALL, BPF_PSEUDO_FUNC, BPF_PSEUDO_MAP_FD,
-        BPF_PSEUDO_MAP_VALUE, bpf_insn,
+        BPF_CALL, BPF_JMP, BPF_K, BPF_PSEUDO_CALL, BPF_PSEUDO_FUNC, BPF_PSEUDO_KFUNC_CALL,
+        BPF_PSEUDO_MAP_FD, BPF_PSEUDO_MAP_VALUE, bpf_insn,
     },
     maps::Map,
     obj::{Function, Object},
@@ -81,6 +82,17 @@ pub enum RelocationError {
         /// The relocation number
         relocation_number: usize,
     },
+
+    /// The program references an undefined function symbol that is not a
+    /// known kfunc in the kernel BTF.
+    #[error("undefined function symbol `{name}` is not a known kfunc")]
+    UnknownKfunc {
+        /// The symbol name
+        name: String,
+        /// The underlying BTF lookup error
+        #[source]
+        source: BtfError,
+    },
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -133,6 +145,100 @@ impl Object {
                     function: function.name.clone(),
                     error,
                 })?;
+            }
+        }
+
+        Ok(())
+    }
+
+    /// Resolves references to kernel kfuncs.
+    ///
+    /// `bpf-linker` does not understand the libbpf `__ksym` convention. An
+    /// `extern "C"` declaration that maps to a kernel kfunc compiles to a
+    /// `call -1` instruction with a relocation against the undefined symbol.
+    /// This method scans those relocations, looks each symbol up in the
+    /// supplied kernel BTF, and patches the corresponding instruction to a
+    /// proper `BPF_PSEUDO_KFUNC_CALL` with the BTF id in `imm`.
+    ///
+    /// Symbols that don't resolve as `BtfKind::Func` are left alone — they
+    /// will be handled by [`Object::relocate_calls`] (or surface as errors
+    /// there if they're not real subprog calls either).
+    ///
+    /// Only kfuncs registered against vmlinux BTF are supported. Module
+    /// kfuncs (which would set `off` to an `fd_array` index) are not handled.
+    pub fn relocate_kfuncs(&mut self, btf: &Btf) -> Result<(), EbpfRelocationError> {
+        // (function key, instruction index inside the function, kfunc btf id).
+        let mut patches: Vec<((usize, u64), usize, u32)> = Vec::new();
+        // (section_index, relocation offset) — removed after patching so the
+        // subsequent call relocation pass ignores them.
+        let mut processed: Vec<(SectionIndex, u64)> = Vec::new();
+
+        for (section_index, relocs_in_section) in &self.relocations {
+            for (offset, rel) in relocs_in_section {
+                let Some(sym) = self.symbol_table.get(&rel.symbol_index) else {
+                    continue;
+                };
+                // Only consider relocations against undefined symbols with a
+                // name. Defined-text symbols are handled by `relocate_calls`,
+                // data relocations by `relocate_maps`.
+                if sym.section_index.is_some() {
+                    continue;
+                }
+                let Some(name) = sym.name.as_deref() else {
+                    continue;
+                };
+
+                let kfunc_btf_id = match btf.id_by_type_name_kind(name, BtfKind::Func) {
+                    Ok(id) => id,
+                    Err(source) => {
+                        return Err(EbpfRelocationError {
+                            function: name.to_owned(),
+                            error: RelocationError::UnknownKfunc {
+                                name: name.to_owned(),
+                                source,
+                            },
+                        });
+                    }
+                };
+
+                // Find the function this relocation lands in.
+                let mut found = false;
+                for (key, fun) in &self.functions {
+                    if fun.section_index != *section_index {
+                        continue;
+                    }
+                    let start = fun.section_offset as u64;
+                    let end = start + (fun.instructions.len() * INS_SIZE) as u64;
+                    if *offset >= start && *offset < end {
+                        let ins_index = ((*offset - start) as usize) / INS_SIZE;
+                        patches.push((*key, ins_index, kfunc_btf_id));
+                        processed.push((*section_index, *offset));
+                        found = true;
+                        break;
+                    }
+                }
+                debug_assert!(
+                    found,
+                    "kfunc relocation at offset {offset:#x} in section {section_index:?} \
+                     does not land in any known function"
+                );
+            }
+        }
+
+        for (key, ins_index, btf_id) in patches {
+            if let Some(fun) = self.functions.get_mut(&key) {
+                let ins = &mut fun.instructions[ins_index];
+                ins.set_src_reg(BPF_PSEUDO_KFUNC_CALL as u8);
+                ins.imm = btf_id as i32;
+                // Module kfuncs would set `off` to an fd_array index; we only
+                // support vmlinux BTF here, so leave it at 0.
+                ins.off = 0;
+            }
+        }
+
+        for (section_index, offset) in processed {
+            if let Some(rels) = self.relocations.get_mut(&section_index) {
+                rels.remove(&offset);
             }
         }
 
