@@ -1,6 +1,6 @@
 [package]
 description = "A library for writing eBPF programs"
-name = "aya-ebpf"
+name = "aya-friday-ebpf"
 version = "0.1.2"
 
 authors.workspace = true
@@ -14,10 +14,10 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
-aya-ebpf-bindings = { version = "^0.1.2", path = "../aya-ebpf-bindings" }
-aya-ebpf-cty = { version = "^0.2.3", path = "../aya-ebpf-cty" }
-aya-ebpf-macros = { version = "^0.1.2", path = "../../aya-ebpf-macros" }
+aya-ebpf-bindings = { version = "^0.1.2", path = "../aya-ebpf-bindings", package = "aya-friday-ebpf-bindings" }
+aya-ebpf-cty = { version = "^0.2.3", path = "../aya-ebpf-cty", package = "aya-friday-ebpf-cty" }
+aya-ebpf-macros = { version = "^0.1.2", path = "../../aya-ebpf-macros", package = "aya-friday-ebpf-macros" }
 
 [build-dependencies]
-aya-build = { version = "^0.1.3", path = "../../aya-build" }
+aya-build = { version = "^0.1.3", path = "../../aya-build", package = "aya-friday-build" }
 rustversion = { workspace = true }

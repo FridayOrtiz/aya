@@ -1,6 +1,6 @@
 [package]
 description = "Proc macros used by aya-ebpf"
-name = "aya-ebpf-macros"
+name = "aya-friday-ebpf-macros"
 version = "0.1.2"
 
 authors.workspace = true
@@ -23,5 +23,5 @@ quote = { workspace = true }
 syn = { workspace = true, default-features = true, features = ["full"] }
 
 [dev-dependencies]
-aya-ebpf = { path = "../ebpf/aya-ebpf", default-features = false }
+aya-ebpf = { path = "../ebpf/aya-ebpf", default-features = false, package = "aya-friday-ebpf" }
 rstest = { workspace = true }
