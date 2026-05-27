@@ -32,8 +32,8 @@ impl<T> InodeStorage<T> {
     /// `inode` must be a valid kernel `struct inode *`.
     #[inline(always)]
     pub unsafe fn get_ptr(&self, inode: *mut c_void) -> Option<*mut T> {
-        let p = unsafe { bpf_inode_storage_get(self.as_ptr(), inode, ptr::null_mut(), 0) }
-            .cast::<T>();
+        let p =
+            unsafe { bpf_inode_storage_get(self.as_ptr(), inode, ptr::null_mut(), 0) }.cast::<T>();
         if p.is_null() { None } else { Some(p) }
     }
 
