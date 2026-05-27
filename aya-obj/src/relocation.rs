@@ -407,6 +407,21 @@ impl<'a> FunctionLinker<'a> {
         // it will trigger linking in all the callees.
         self.relocate(&mut fun, program_function)?;
 
+        // The kernel verifier insists `func_info_cnt == subprog_cnt`. If any
+        // linked callee lacked a BTF.ext func_info entry (common for
+        // compiler-emitted helpers like memset/memcpy/memmove), our extended
+        // list will be short and the kernel will reject the program with
+        // `number of funcs in func_info doesn't match number of subprogs`.
+        // Drop func_info / line_info entirely in that case — debug info is
+        // lost but the program loads.
+        let expected_func_info_cnt = self.linked_functions.len() + 1;
+        if fun.func_info.func_info.len() != expected_func_info_cnt {
+            fun.func_info = Default::default();
+            fun.func_info_rec_size = 0;
+            fun.line_info = Default::default();
+            fun.line_info_rec_size = 0;
+        }
+
         // this now includes the program function plus all the other functions called during
         // execution
         Ok(fun)
