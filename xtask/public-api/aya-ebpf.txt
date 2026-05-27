@@ -176,6 +176,23 @@ impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::marker::Unpin for
 impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::marker::UnsafeUnpin for aya_ebpf::btf_maps::hash_map::PerCpuHashMap<K, V, MAX_ENTRIES, FLAGS>
 impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::panic::unwind_safe::RefUnwindSafe for aya_ebpf::btf_maps::hash_map::PerCpuHashMap<K, V, MAX_ENTRIES, FLAGS> where K: core::panic::unwind_safe::RefUnwindSafe, V: core::panic::unwind_safe::RefUnwindSafe
 impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::panic::unwind_safe::UnwindSafe for aya_ebpf::btf_maps::hash_map::PerCpuHashMap<K, V, MAX_ENTRIES, FLAGS> where K: core::panic::unwind_safe::RefUnwindSafe, V: core::panic::unwind_safe::RefUnwindSafe
+pub mod aya_ebpf::btf_maps::inode_storage
+#[repr(C)] pub struct aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+pub unsafe fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::delete(&self, *mut aya_ebpf_cty::c_void) -> core::result::Result<(), i32>
+pub unsafe fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::get_or_insert_ptr(&self, *mut aya_ebpf_cty::c_void, *mut T) -> core::option::Option<*mut T>
+pub unsafe fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::get_ptr(&self, *mut aya_ebpf_cty::c_void) -> core::option::Option<*mut T>
+impl<T> aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+pub const fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::new() -> Self
+impl<T> core::default::Default for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+pub fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::default() -> Self
+impl<T> core::marker::Sync for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::marker::Freeze for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> !core::marker::Send for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::marker::Unpin for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::marker::UnsafeUnpin for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::panic::unwind_safe::RefUnwindSafe for aya_ebpf::btf_maps::inode_storage::InodeStorage<T> where T: core::panic::unwind_safe::RefUnwindSafe
+impl<T> core::panic::unwind_safe::UnwindSafe for aya_ebpf::btf_maps::inode_storage::InodeStorage<T> where T: core::panic::unwind_safe::RefUnwindSafe
 pub mod aya_ebpf::btf_maps::lpm_trie
 #[repr(C, packed(1))] pub struct aya_ebpf::btf_maps::lpm_trie::Key<K>
 pub aya_ebpf::btf_maps::lpm_trie::Key::data: K
@@ -602,6 +619,22 @@ impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::marker::Unpin for
 impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::marker::UnsafeUnpin for aya_ebpf::btf_maps::HashOfMaps<K, V, MAX_ENTRIES, FLAGS>
 impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::panic::unwind_safe::RefUnwindSafe for aya_ebpf::btf_maps::HashOfMaps<K, V, MAX_ENTRIES, FLAGS> where K: core::panic::unwind_safe::RefUnwindSafe, V: core::panic::unwind_safe::RefUnwindSafe
 impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> core::panic::unwind_safe::UnwindSafe for aya_ebpf::btf_maps::HashOfMaps<K, V, MAX_ENTRIES, FLAGS> where K: core::panic::unwind_safe::RefUnwindSafe, V: core::panic::unwind_safe::RefUnwindSafe
+#[repr(C)] pub struct aya_ebpf::btf_maps::InodeStorage<T>
+impl<T> aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+pub unsafe fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::delete(&self, *mut aya_ebpf_cty::c_void) -> core::result::Result<(), i32>
+pub unsafe fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::get_or_insert_ptr(&self, *mut aya_ebpf_cty::c_void, *mut T) -> core::option::Option<*mut T>
+pub unsafe fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::get_ptr(&self, *mut aya_ebpf_cty::c_void) -> core::option::Option<*mut T>
+impl<T> aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+pub const fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::new() -> Self
+impl<T> core::default::Default for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+pub fn aya_ebpf::btf_maps::inode_storage::InodeStorage<T>::default() -> Self
+impl<T> core::marker::Sync for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::marker::Freeze for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> !core::marker::Send for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::marker::Unpin for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::marker::UnsafeUnpin for aya_ebpf::btf_maps::inode_storage::InodeStorage<T>
+impl<T> core::panic::unwind_safe::RefUnwindSafe for aya_ebpf::btf_maps::inode_storage::InodeStorage<T> where T: core::panic::unwind_safe::RefUnwindSafe
+impl<T> core::panic::unwind_safe::UnwindSafe for aya_ebpf::btf_maps::inode_storage::InodeStorage<T> where T: core::panic::unwind_safe::RefUnwindSafe
 #[repr(C)] pub struct aya_ebpf::btf_maps::LpmTrie<K, V, const MAX_ENTRIES: usize, const FLAGS: usize>
 impl<K, V, const MAX_ENTRIES: usize, const FLAGS: usize> aya_ebpf::btf_maps::lpm_trie::LpmTrie<K, V, MAX_ENTRIES, FLAGS>
 pub fn aya_ebpf::btf_maps::lpm_trie::LpmTrie<K, V, MAX_ENTRIES, FLAGS>::get(&self, &aya_ebpf::maps::lpm_trie::Key<K>) -> core::option::Option<&V>

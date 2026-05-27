@@ -4853,6 +4853,7 @@ impl aya_obj::Object
 pub fn aya_obj::Object::relocate_btf(&mut self, &aya_obj::btf::Btf) -> core::result::Result<(), aya_obj::btf::BtfRelocationError>
 impl aya_obj::Object
 pub fn aya_obj::Object::relocate_calls(&mut self, &std::collections::hash::set::HashSet<usize>) -> core::result::Result<(), aya_obj::relocation::EbpfRelocationError>
+pub fn aya_obj::Object::relocate_kfuncs(&mut self, &aya_obj::btf::Btf) -> core::result::Result<(), aya_obj::relocation::EbpfRelocationError>
 pub fn aya_obj::Object::relocate_maps<'a, I: core::iter::traits::iterator::Iterator<Item = (&'a str, std::os::fd::raw::RawFd, &'a aya_obj::maps::Map)>>(&mut self, I, &std::collections::hash::set::HashSet<usize>) -> core::result::Result<(), aya_obj::relocation::EbpfRelocationError>
 impl core::clone::Clone for aya_obj::Object
 pub fn aya_obj::Object::clone(&self) -> aya_obj::Object
@@ -5174,12 +5175,16 @@ pub aya_obj::relocation::RelocationError::SectionNotFound::symbol_name: core::op
 pub aya_obj::relocation::RelocationError::UnknownFunction
 pub aya_obj::relocation::RelocationError::UnknownFunction::address: u64
 pub aya_obj::relocation::RelocationError::UnknownFunction::caller_name: alloc::string::String
+pub aya_obj::relocation::RelocationError::UnknownKfunc
+pub aya_obj::relocation::RelocationError::UnknownKfunc::name: alloc::string::String
+pub aya_obj::relocation::RelocationError::UnknownKfunc::source: aya_obj::btf::BtfError
 pub aya_obj::relocation::RelocationError::UnknownProgram
 pub aya_obj::relocation::RelocationError::UnknownProgram::address: u64
 pub aya_obj::relocation::RelocationError::UnknownProgram::section_index: usize
 pub aya_obj::relocation::RelocationError::UnknownSymbol
 pub aya_obj::relocation::RelocationError::UnknownSymbol::index: usize
 impl core::error::Error for aya_obj::relocation::RelocationError
+pub fn aya_obj::relocation::RelocationError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
 impl core::fmt::Debug for aya_obj::relocation::RelocationError
 pub fn aya_obj::relocation::RelocationError::fmt(&self, &mut core::fmt::Formatter<'_>) -> core::fmt::Result
 impl core::fmt::Display for aya_obj::relocation::RelocationError
@@ -5189,8 +5194,8 @@ impl core::marker::Send for aya_obj::relocation::RelocationError
 impl core::marker::Sync for aya_obj::relocation::RelocationError
 impl core::marker::Unpin for aya_obj::relocation::RelocationError
 impl core::marker::UnsafeUnpin for aya_obj::relocation::RelocationError
-impl core::panic::unwind_safe::RefUnwindSafe for aya_obj::relocation::RelocationError
-impl core::panic::unwind_safe::UnwindSafe for aya_obj::relocation::RelocationError
+impl !core::panic::unwind_safe::RefUnwindSafe for aya_obj::relocation::RelocationError
+impl !core::panic::unwind_safe::UnwindSafe for aya_obj::relocation::RelocationError
 pub struct aya_obj::relocation::EbpfRelocationError
 impl core::error::Error for aya_obj::relocation::EbpfRelocationError
 pub fn aya_obj::relocation::EbpfRelocationError::source(&self) -> core::option::Option<&(dyn core::error::Error + 'static)>
@@ -5203,8 +5208,8 @@ impl core::marker::Send for aya_obj::relocation::EbpfRelocationError
 impl core::marker::Sync for aya_obj::relocation::EbpfRelocationError
 impl core::marker::Unpin for aya_obj::relocation::EbpfRelocationError
 impl core::marker::UnsafeUnpin for aya_obj::relocation::EbpfRelocationError
-impl core::panic::unwind_safe::RefUnwindSafe for aya_obj::relocation::EbpfRelocationError
-impl core::panic::unwind_safe::UnwindSafe for aya_obj::relocation::EbpfRelocationError
+impl !core::panic::unwind_safe::RefUnwindSafe for aya_obj::relocation::EbpfRelocationError
+impl !core::panic::unwind_safe::UnwindSafe for aya_obj::relocation::EbpfRelocationError
 pub enum aya_obj::EbpfSectionKind
 pub aya_obj::EbpfSectionKind::Bss
 pub aya_obj::EbpfSectionKind::Btf
@@ -5450,6 +5455,7 @@ impl aya_obj::Object
 pub fn aya_obj::Object::relocate_btf(&mut self, &aya_obj::btf::Btf) -> core::result::Result<(), aya_obj::btf::BtfRelocationError>
 impl aya_obj::Object
 pub fn aya_obj::Object::relocate_calls(&mut self, &std::collections::hash::set::HashSet<usize>) -> core::result::Result<(), aya_obj::relocation::EbpfRelocationError>
+pub fn aya_obj::Object::relocate_kfuncs(&mut self, &aya_obj::btf::Btf) -> core::result::Result<(), aya_obj::relocation::EbpfRelocationError>
 pub fn aya_obj::Object::relocate_maps<'a, I: core::iter::traits::iterator::Iterator<Item = (&'a str, std::os::fd::raw::RawFd, &'a aya_obj::maps::Map)>>(&mut self, I, &std::collections::hash::set::HashSet<usize>) -> core::result::Result<(), aya_obj::relocation::EbpfRelocationError>
 impl core::clone::Clone for aya_obj::Object
 pub fn aya_obj::Object::clone(&self) -> aya_obj::Object
