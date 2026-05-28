@@ -14,7 +14,7 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
-aya = { path = "../../aya", optional = true }
+aya = { path = "../../aya", optional = true, package = "aya-friday" }
 
 [features]
 user = ["aya"]

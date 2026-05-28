@@ -14,7 +14,7 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
-aya-ebpf = { path = "../../ebpf/aya-ebpf" }
+aya-ebpf = { path = "../../ebpf/aya-ebpf", package = "aya-friday-ebpf" }
 aya-log-ebpf = { path = "../../ebpf/aya-log-ebpf" }
 ebpf-panic = { path = "../../ebpf-panic" }
 integration-common = { path = "../integration-common" }

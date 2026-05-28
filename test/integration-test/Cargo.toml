@@ -14,13 +14,13 @@ rust-version.workspace = true
 workspace = true
 
 [dependencies]
-aya = { path = "../../aya", version = "^0.13.2", default-features = false }
+aya = { path = "../../aya", version = "^0.13.2", default-features = false, package = "aya-friday" }
 
 [dev-dependencies]
 anyhow = { workspace = true, features = ["std"] }
 assert_matches = { workspace = true }
 aya-log = { path = "../../aya-log", version = "^0.2.2", default-features = false }
-aya-obj = { path = "../../aya-obj", version = "^0.2.2" }
+aya-obj = { path = "../../aya-obj", version = "^0.2.2", package = "aya-friday-obj" }
 epoll = { workspace = true }
 futures = { workspace = true, features = ["alloc"] }
 integration-common = { path = "../integration-common", features = ["user"] }
@@ -46,7 +46,7 @@ xdpilone = { workspace = true }
 
 [build-dependencies]
 anyhow = { workspace = true }
-aya-build = { path = "../../aya-build" }
+aya-build = { path = "../../aya-build", package = "aya-friday-build" }
 cargo_metadata = { workspace = true }
 # TODO(https://github.com/rust-lang/cargo/issues/12375): this should be an artifact dependency, but
 # it's not possible to tell cargo to use `-Z build-std` to build it. We cargo-in-cargo in the build
